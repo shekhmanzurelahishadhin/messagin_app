@@ -11,7 +11,15 @@ class Message extends Model
 
     public $timestamps = false; // only created_at
 
-    protected $fillable = ['thread_id', 'user_id', 'body', 'is_read'];
+    protected $fillable = [
+        'thread_id',
+        'user_id',
+        'body',
+        'is_read',
+        'attachment_path',
+        'attachment_name',
+        'attachment_type'
+    ];
 
     protected $casts = [
         'is_read'    => 'boolean',

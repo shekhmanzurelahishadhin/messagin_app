@@ -72,13 +72,25 @@ class ThreadController extends Controller
             ]);
         }
 
+        $attachmentData = [];
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $path = $file->store('attachments', 'public');
+            
+            $attachmentData = [
+                'attachment_path' => $path,
+                'attachment_name' => $file->getClientOriginalName(),
+                'attachment_type' => $file->getMimeType(),
+            ];
+        }
+
         // Create initial message
-        $message = Message::create([
+        $message = Message::create(array_merge([
             'thread_id' => $thread->id,
             'user_id'   => $user->id,
-            'body'      => $request->body,
+            'body'      => $request->body ?? '',
             'is_read'   => false,
-        ]);
+        ], $attachmentData));
 
         $thread->touch();
         $message->refresh()->load('user');
@@ -87,7 +99,7 @@ class ThreadController extends Controller
         // ── Notify each OTHER participant's personal inbox channel ──
         $lastMessagePayload = [
             'id'         => $message->id,
-            'body'       => $message->body,
+            'body'       => $message->body ?: ($message->attachment_name ?: 'Attachment'),
             'user_id'    => $message->user_id,
             'created_at' => $message->created_at
                 ? $message->created_at->toISOString()

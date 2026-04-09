@@ -8,7 +8,7 @@ export default function useEcho() {
   const { user, token } = useAuthStore()
   const { currentThread, pushMessage,
           pushThreadUpdate, fetchThreads,
-          fetchUnreadCount } = useThreadsStore()
+          fetchUnreadCount, removeMessageLocally } = useThreadsStore()
 
   const echoRef = useRef(null)
   const threadChannelRef = useRef(null)
@@ -81,6 +81,9 @@ export default function useEcho() {
       .private(`thread.${threadId}`)
       .listen('.message.sent', (e) => {
         pushMessage(e.message, e.thread_id, user.id)
+      })
+      .listen('.message.deleted', (e) => {
+        removeMessageLocally(e.message_id, e.thread_id)
       })
 
     // Tag the channel ref

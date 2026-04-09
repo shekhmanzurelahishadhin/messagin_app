@@ -37,5 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Messages
     Route::post('/threads/{thread}/messages', [MessageController::class, 'store']);
+    Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
     Route::put('/messages/{message}/read', [MessageController::class, 'markRead']);
 });

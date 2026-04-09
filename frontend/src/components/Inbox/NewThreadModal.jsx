@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { RiCloseLine, RiUserAddLine, RiCheckLine } from 'react-icons/ri'
+import { useState, useEffect, useRef } from 'react'
+import { RiCloseLine, RiUserAddLine, RiCheckLine, RiAttachment2, RiFileTextLine } from 'react-icons/ri'
 import useThreadsStore from '../../contexts/threadsStore'
 import LoadingSpinner from '../Common/LoadingSpinner'
 import ErrorAlert from '../Common/ErrorAlert'
@@ -10,12 +10,15 @@ export default function NewThreadModal({ onClose, onCreated }) {
 
   const [subject, setSubject]         = useState('')
   const [body, setBody]               = useState('')
+  const [file, setFile]               = useState(null)
   const [selectedIds, setSelectedIds] = useState([])
   const [users, setUsers]             = useState([])
   const [loadingUsers, setLoadingUsers] = useState(true)
   const [isCreating, setIsCreating]   = useState(false)
   const [errors, setErrors]           = useState({})
   const [globalError, setGlobalError] = useState('')
+
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     api.get('/users').then(({ data }) => {
@@ -35,16 +38,30 @@ export default function NewThreadModal({ onClose, onCreated }) {
     )
   }
 
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0]
+    if (selected) {
+      setFile(selected)
+    }
+  }
+
+  const removeFile = () => {
+    setFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!subject.trim() || !body.trim() || selectedIds.length === 0) {
+    if (!subject.trim() || (!body.trim() && !file) || selectedIds.length === 0) {
       setGlobalError('Please fill in all fields and select at least one participant.')
       return
     }
     setIsCreating(true)
     setGlobalError('')
     setErrors({})
-    const result = await createThread({ subject, participants: selectedIds, body })
+    const result = await createThread({ subject, participants: selectedIds, body, file })
     setIsCreating(false)
     if (result.success) {
       onCreated(result.thread)
@@ -145,11 +162,38 @@ export default function NewThreadModal({ onClose, onCreated }) {
 
           {/* Message */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-ink-400 uppercase tracking-wider">Message</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-ink-400 uppercase tracking-wider">Message</label>
+              <button 
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-violet-400 hover:text-violet-300 text-xs flex items-center gap-1 transition-colors"
+              >
+                <RiAttachment2 size={14} />
+                Attach File
+              </button>
+              <input 
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+
+            {file && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-ink-800 border border-ink-700 mb-1">
+                <RiFileTextLine className="text-ink-400" />
+                <span className="text-xs text-ink-200 truncate flex-1">{file.name}</span>
+                <button type="button" onClick={removeFile} className="text-ink-500 hover:text-rose-400">
+                  <RiCloseLine size={16} />
+                </button>
+              </div>
+            )}
+
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Write your first message…"
+              placeholder={file ? "Add a description… (optional)" : "Write your first message…"}
               rows={3}
               className={`input-field resize-none ${errors.body ? 'border-rose-500/50' : ''}`}
             />

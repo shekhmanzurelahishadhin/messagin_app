@@ -73,10 +73,20 @@ const useThreadsStore = create((set, get) => ({
     } catch (_) {}
   },
 
-  sendMessage: async (threadId, body) => {
+  sendMessage: async (threadId, body, file = null) => {
     set({ isSending: true })
     try {
-      const { data } = await api.post(`/threads/${threadId}/messages`, { body })
+      let payload;
+
+      if (file) {
+        payload = new FormData();
+        payload.append('body', body || '');
+        payload.append('file', file);
+      } else {
+        payload = { body };
+      }
+
+      const { data } = await api.post(`/threads/${threadId}/messages`, payload)
       // Sender sees own message immediately (Echo won't echo back to sender)
       set((state) => ({ messages: [...state.messages, data.data], isSending: false }))
       get().bumpThread(threadId, data.data)
@@ -87,9 +97,33 @@ const useThreadsStore = create((set, get) => ({
     }
   },
 
-  createThread: async ({ subject, participants, body }) => {
+  deleteMessage: async (messageId) => {
     try {
-      const { data } = await api.post('/threads', { subject, participants, body })
+      await api.delete(`/messages/${messageId}`)
+      const { currentThread } = get()
+      if (currentThread) {
+        get().removeMessageLocally(messageId, currentThread.id)
+      }
+      return { success: true }
+    } catch (_) {
+      return { success: false }
+    }
+  },
+
+  createThread: async ({ subject, participants, body, file = null }) => {
+    try {
+      let payload;
+      if (file) {
+        payload = new FormData();
+        payload.append('subject', subject);
+        payload.append('body', body || '');
+        payload.append('file', file);
+        participants.forEach(id => payload.append('participants[]', id));
+      } else {
+        payload = { subject, participants, body };
+      }
+
+      const { data } = await api.post('/threads', payload)
       set((state) => ({ threads: [data.data, ...state.threads] }))
       return { success: true, thread: data.data }
     } catch (err) {
@@ -200,6 +234,32 @@ const useThreadsStore = create((set, get) => ({
           (state.threads.find((t) => t.id === threadId)?.unread_count || 0)
       ),
     }))
+  },
+
+  removeMessageLocally: (messageId, threadId) => {
+    set((state) => {
+      const messages = state.messages.filter((m) => m.id !== messageId)
+      const thread = state.threads.find((t) => t.id === threadId)
+      
+      let threads = state.threads
+      if (thread && thread.last_message?.id === messageId) {
+        threads = state.threads.map((t) =>
+          t.id === threadId
+            ? {
+                ...t,
+                last_message: {
+                  ...t.last_message,
+                  body: 'This message was deleted.',
+                  attachment_url: null,
+                  attachment_name: null,
+                },
+              }
+            : t
+        )
+      }
+
+      return { messages, threads }
+    })
   },
 
   bumpThread: (threadId, message) => {

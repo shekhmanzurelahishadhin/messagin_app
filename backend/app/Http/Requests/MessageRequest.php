@@ -11,7 +11,8 @@ class MessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'body' => 'required|string|max:5000',
+            'body' => 'nullable|string|max:5000|required_without:file',
+            'file' => 'nullable|file|max:10240', // 10MB limit
         ];
     }
 }

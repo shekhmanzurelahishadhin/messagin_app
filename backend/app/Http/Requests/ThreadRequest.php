@@ -14,7 +14,8 @@ class ThreadRequest extends FormRequest
             'subject'        => 'required|string|max:255',
             'participants'   => 'required|array|min:1',
             'participants.*' => 'exists:users,id',
-            'body'           => 'required|string',
+            'body'           => 'nullable|string|required_without:file',
+            'file'           => 'nullable|file|max:10240',
         ];
     }
 }
