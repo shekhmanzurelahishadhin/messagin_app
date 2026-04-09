@@ -1,0 +1,23 @@
+# Laravel
+/backend/vendor/
+/backend/.env
+/backend/storage/
+/backend/bootstrap/cache/
+
+# React
+/frontend/node_modules/
+/frontend/dist/
+/frontend/build/
+
+# Common
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
