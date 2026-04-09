@@ -100,6 +100,7 @@ class ThreadController extends Controller
         $lastMessagePayload = [
             'id'         => $message->id,
             'body'       => $message->body ?: ($message->attachment_name ?: 'Attachment'),
+            'attachment_name'       => $message->attachment_name,
             'user_id'    => $message->user_id,
             'created_at' => $message->created_at
                 ? $message->created_at->toISOString()

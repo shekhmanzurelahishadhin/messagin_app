@@ -58,10 +58,11 @@ class MessageController extends Controller
 
         // ── Notify each OTHER participant's personal inbox channel ──
         $lastMessagePayload = [
-            'id'         => $message->id,
-            'body'       => $message->body ?: ($message->attachment_name ?: 'Attachment'),
-            'user_id'    => $message->user_id,
-            'created_at' => $message->created_at
+            'id'              => $message->id,
+            'body'            => $message->body ?: ($message->attachment_name ?: 'Attachment'),
+            'attachment_name' => $message->attachment_name,
+            'user_id'         => $message->user_id,
+            'created_at'      => $message->created_at
                 ? $message->created_at->toISOString()
                 : null,
         ];

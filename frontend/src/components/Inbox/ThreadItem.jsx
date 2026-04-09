@@ -60,7 +60,7 @@ export default function ThreadItem({ thread, isActive, onClick }) {
 
           <div className="flex items-center justify-between gap-2 mt-0.5">
             <p className={`text-xs truncate ${unread > 0 ? 'text-ink-400' : 'text-ink-600'}`}>
-              {lastMsg?.body || 'No messages yet'}
+              {lastMsg?.body ? lastMsg.body : (lastMsg.attachment_name ? `${lastMsg.attachment_name}` : 'No messages yet.')}
             </p>
             {unread > 0 && (
               <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-violet-600 text-white text-[10px] font-semibold flex items-center justify-center animate-pulse-dot">

@@ -38,9 +38,10 @@ class MessageSent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         $this->message->refresh()->loadMissing('user');
+        $resource = (new MessageResource($this->message))->resolve();
 
         return [
-            'message'   => (new MessageResource($this->message))->resolve(),
+            'message'   => $resource,
             'thread_id' => $this->thread->id,
         ];
     }

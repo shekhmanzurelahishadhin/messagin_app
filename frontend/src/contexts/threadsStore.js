@@ -209,6 +209,7 @@ const useThreadsStore = create((set, get) => ({
       ...exists,
       last_message: {
         ...lastMessage,
+        attachment_name: lastMessage.attachment_name,
         created_at: lastMessage.created_at || new Date().toISOString(),
       },
       updated_at:   lastMessage.created_at || new Date().toISOString(),
@@ -270,10 +271,11 @@ const useThreadsStore = create((set, get) => ({
       const updated = {
         ...thread,
         last_message: {
-          id:         message.id,
-          body:       message.body,
-          user_id:    message.user_id,
-          created_at: message.created_at || now,
+          id:              message.id,
+          body:            message.body,
+          user_id:         message.user_id,
+          attachment_name: message.attachment_name,
+          created_at:      message.created_at || now,
         },
         updated_at: message.created_at || now,
       }

@@ -21,6 +21,7 @@ class ThreadResource extends JsonResource
             'last_message' => $lastMessage ? [
                 'id'         => $lastMessage->id,
                 'body'       => $lastMessage->body,
+                'attachment_name'       => $lastMessage->attachment_name,
                 'user_id'    => $lastMessage->user_id,
                 'created_at' => optional($lastMessage->created_at)->toISOString(),
             ] : null,
