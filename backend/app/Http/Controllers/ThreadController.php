@@ -155,6 +155,26 @@ class ThreadController extends Controller
     }
 
     /**
+     * PUT /api/threads/read-all
+     */
+    public function markAllRead(Request $request)
+    {
+        $user = $request->user();
+
+        Message::whereHas('thread.participants', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+            ->where('user_id', '!=', $user->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        ThreadParticipant::where('user_id', $user->id)
+            ->update(['last_read_at' => now()]);
+
+        return response()->json(['message' => 'All threads marked as read.']);
+    }
+
+    /**
      * DELETE /api/threads/{thread}
      */
     public function destroy(Request $request, Thread $thread)

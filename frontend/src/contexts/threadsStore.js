@@ -152,6 +152,16 @@ const useThreadsStore = create((set, get) => ({
     } catch (_) {}
   },
 
+  markAllThreadsAsRead: async () => {
+    try {
+      await api.put('/threads/read-all')
+      set((state) => ({
+        unreadCount: 0,
+        threads: state.threads.map((t) => ({ ...t, unread_count: 0 })),
+      }))
+    } catch (_) {}
+  },
+
   // ── Real-time push handlers called by useEcho ─────────────────────────────
 
   /**

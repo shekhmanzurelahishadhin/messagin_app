@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Threads
     Route::get('/threads/unread/count', [ThreadController::class, 'unreadCount']);
+    Route::put('/threads/read-all', [ThreadController::class, 'markAllRead']);
     Route::apiResource('threads', ThreadController::class)->except(['update']);
     Route::put('/threads/{thread}/read', [ThreadController::class, 'markRead']);
 
